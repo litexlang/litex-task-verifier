@@ -1,0 +1,3 @@
+# Litex Task Verifier Dependencies
+volcengine-python-sdk[ark]
+pylitex
