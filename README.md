@@ -1,17 +1,17 @@
-# LiteX Task Verifier
+# Litex Task Verifier
 
-A comprehensive Python utility for verifying LiteX code solutions through dual verification modes: semantic analysis using multiple Large Language Models (LLMs) with enhanced dual-round voting, and grammar validation using pylitex.
+A comprehensive Python utility for verifying Litex code solutions through dual verification modes: semantic analysis using multiple Large Language Models (LLMs) with enhanced dual-round voting, and grammar validation using pylitex.
 
 ## Overview
 
-This tool provides two verification approaches: (1) **Semantic Verification** - converts LiteX code to LaTeX and uses multiple AI models (Qwen Max, Qwen Plus, and DeepSeek V3.1) to evaluate whether the mathematical expressions correctly solve given problems, employing dual-round voting for enhanced reliability; (2) **Grammar Verification** - validates LiteX syntax correctness using pylitex compilation.
+This tool provides two verification approaches: (1) **Semantic Verification** - converts Litex code to LaTeX and uses multiple AI models (Qwen Max, Qwen Plus, and DeepSeek V3.1) to evaluate whether the mathematical expressions correctly solve given problems, employing dual-round voting for enhanced reliability; (2) **Grammar Verification** - validates Litex syntax correctness using pylitex compilation.
 
 ## Features
 
 - **Multi-LLM Verification**: Uses three different AI models for robust evaluation
 - **Dual Verification Modes**: Semantic verification (content correctness) and grammar verification (syntax correctness)
-- **LiteX to LaTeX Conversion**: Automatically converts LiteX code to LaTeX format
-- **Grammar Checking**: Built-in LiteX grammar verification using pylitex
+- **Litex to LaTeX Conversion**: Automatically converts Litex code to LaTeX format
+- **Grammar Checking**: Built-in Litex grammar verification using pylitex
 - **Dual-Round Voting**: Enhanced reliability through 6-vote system (2 rounds × 3 models)
 - **Batch Processing**: Supports processing multiple test cases via CSV files
 - **Multiprocessing**: Parallel processing for improved performance
@@ -36,7 +36,7 @@ litex-task-verifier/
 │   ├── ai_utils.py         # AI model interaction utilities
 │   ├── config_utils.py     # Configuration utilities
 │   ├── csv_utils.py        # CSV handling utilities
-│   ├── litex_utils.py      # LiteX processing utilities
+│   ├── litex_utils.py      # Litex processing utilities
 │   └── tmp_hasher.py       # Temporary file hashing
 └── tmp/                    # Temporary processing files
 ```
@@ -59,7 +59,7 @@ litex-task-verifier/
    The required dependencies are:
 
    - `openai` (for AI model access)
-   - `pylitex` (for LiteX grammar verification)
+   - `pylitex` (for Litex grammar verification)
 
 3. **Configure API access**:
    ```bash
@@ -101,14 +101,14 @@ print("Semantic verification:", semantic_result)
 # Returns: {'title': '...', 'description': '...', 'solution': '...', 
 #          'collaboration_title': '...', 'expect': '...', 'actual': 'Yes'}
 
-# Grammar verification (checks LiteX syntax correctness)
+# Grammar verification (checks Litex syntax correctness)
 grammar_result = verify_grammar(test_data)
 print("Grammar verification:", grammar_result)
 # Returns: {'title': '...', 'description': '...', 'solution': '...', 
 #          'collaboration_title': '...', 'output': '...', 'success': True}
 ```
 
-**Note**: If LiteX to LaTeX conversion fails during semantic verification, the function returns `"No"` for the `actual` field to handle invalid syntax gracefully.
+**Note**: If Litex to LaTeX conversion fails during semantic verification, the function returns `"No"` for the `actual` field to handle invalid syntax gracefully.
 
 ### Batch Processing
 
@@ -160,7 +160,7 @@ Your input CSV should contain these columns:
 
 - `title`: Problem title
 - `description`: Problem description
-- `solution`: LiteX code solution
+- `solution`: Litex code solution
 - `collaboration_title`: Additional context
 - `expect`: Expected verification result ("TRUE" or "FALSE")
 
@@ -174,8 +174,8 @@ Returns a dictionary with:
 #### Grammar Verification (`verify_grammar`)
 Returns a dictionary with:
 - All original input fields
-- `output`: LiteX compilation output/error messages
-- `success`: Boolean indicating if LiteX code compiled successfully
+- `output`: Litex compilation output/error messages
+- `success`: Boolean indicating if Litex code compiled successfully
 
 ## API Models Used
 
@@ -201,10 +201,10 @@ The tool uses an enhanced dual-round voting system where:
 ```python
 from verifier import verify_semantic, verify_grammar
 
-# Semantic verification - checks if LiteX code solves the given problem
+# Semantic verification - checks if Litex code solves the given problem
 result = verify_semantic(test_data)
 
-# Grammar verification - checks if LiteX code is syntactically correct
+# Grammar verification - checks if Litex code is syntactically correct
 result = verify_grammar(test_data)
 ```
 
@@ -281,7 +281,7 @@ with mp.Pool(processes=40) as pool:
 
 The verifier includes comprehensive error handling for:
 
-- LiteX to LaTeX conversion failures
+- Litex to LaTeX conversion failures
 - API communication errors
 - Configuration file issues
 - Invalid input data
@@ -309,7 +309,7 @@ For issues and questions, please open an issue on GitHub or contact the developm
 - **Enhanced Dual-Round Voting**: Implemented 2-round voting system for improved reliability (6 total votes)
 - **Improved Accuracy**: Achieved 99.11% overall accuracy with enhanced voting mechanism
 - **Model Update**: Transitioned to Qwen Max, Qwen Plus, and DeepSeek V3.1 for optimal performance
-- **Error Handling**: Enhanced error handling for LiteX conversion failures
+- **Error Handling**: Enhanced error handling for Litex conversion failures
 - **Reduced False Negatives**: Decreased false negative rate to 1.11%
 - **Configuration Simplification**: Streamlined config.json structure with unified API key field
 - **Multiprocessing Optimization**: Fixed multiprocessing issues for stable parallel processing
