@@ -1,10 +1,10 @@
 # Litex Task Verifier
 
-A comprehensive Python utility for verifying Litex code solutions through dual verification modes: semantic analysis using multiple Large Language Models (LLMs) with majority voting, and grammar validation using pylitex.
+A comprehensive Python utility for verifying Litex code solutions through dual verification modes: semantic analysis using multiple Large Language Models (LLMs) with enhanced dual-round voting, and grammar validation using pylitex.
 
 ## Overview
 
-This tool provides two verification approaches: (1) **Semantic Verification** - converts Litex code to LaTeX and uses multiple AI models (DeepSeek R1, Kimi, and Doubao) to evaluate whether the mathematical expressions correctly solve given problems, employing majority voting for enhanced reliability; (2) **Grammar Verification** - validates Litex syntax correctness using pylitex compilation.
+This tool provides two verification approaches: (1) **Semantic Verification** - converts Litex code to LaTeX and uses multiple AI models (Qwen Max, Qwen Plus, and DeepSeek V3.1) to evaluate whether the mathematical expressions correctly solve given problems, employing dual-round voting for enhanced reliability; (2) **Grammar Verification** - validates Litex syntax correctness using pylitex compilation.
 
 ## Features
 
@@ -12,7 +12,7 @@ This tool provides two verification approaches: (1) **Semantic Verification** - 
 - **Dual Verification Modes**: Semantic verification (content correctness) and grammar verification (syntax correctness)
 - **Litex to LaTeX Conversion**: Automatically converts Litex code to LaTeX format
 - **Grammar Checking**: Built-in Litex grammar verification using pylitex
-- **Majority Voting**: Combines results from multiple models for more reliable outcomes
+- **Dual-Round Voting**: Enhanced reliability through 6-vote system (2 rounds × 3 models)
 - **Batch Processing**: Supports processing multiple test cases via CSV files
 - **Multiprocessing**: Parallel processing for improved performance
 - **Configuration Management**: JSON-based configuration for API keys and settings
