@@ -1,17 +1,17 @@
-# Litex Task Verifier
+# LiteX Task Verifier
 
-A comprehensive Python utility for verifying Litex code solutions through dual verification modes: semantic analysis using multiple Large Language Models (LLMs) with enhanced dual-round voting, and grammar validation using pylitex.
+A comprehensive Python utility for verifying LiteX code solutions through dual verification modes: semantic analysis using multiple Large Language Models (LLMs) with enhanced dual-round voting, and grammar validation using pylitex.
 
 ## Overview
 
-This tool provides two verification approaches: (1) **Semantic Verification** - converts Litex code to LaTeX and uses multiple AI models (Qwen Max, Qwen Plus, and DeepSeek V3.1) to evaluate whether the mathematical expressions correctly solve given problems, employing dual-round voting for enhanced reliability; (2) **Grammar Verification** - validates Litex syntax correctness using pylitex compilation.
+This tool provides two verification approaches: (1) **Semantic Verification** - converts LiteX code to LaTeX and uses multiple AI models (Qwen Max, Qwen Plus, and DeepSeek V3.1) to evaluate whether the mathematical expressions correctly solve given problems, employing dual-round voting for enhanced reliability; (2) **Grammar Verification** - validates LiteX syntax correctness using pylitex compilation.
 
 ## Features
 
 - **Multi-LLM Verification**: Uses three different AI models for robust evaluation
 - **Dual Verification Modes**: Semantic verification (content correctness) and grammar verification (syntax correctness)
-- **Litex to LaTeX Conversion**: Automatically converts Litex code to LaTeX format
-- **Grammar Checking**: Built-in Litex grammar verification using pylitex
+- **LiteX to LaTeX Conversion**: Automatically converts LiteX code to LaTeX format
+- **Grammar Checking**: Built-in LiteX grammar verification using pylitex
 - **Dual-Round Voting**: Enhanced reliability through 6-vote system (2 rounds × 3 models)
 - **Batch Processing**: Supports processing multiple test cases via CSV files
 - **Multiprocessing**: Parallel processing for improved performance
@@ -25,15 +25,20 @@ litex-task-verifier/
 ├── requirements.txt         # Python dependencies
 ├── verifier.py              # Main verification logic
 ├── config.json.template     # Template for configuration
+├── __init__.py              # Package initialization
 ├── test/
+│   ├── __init__.py
 │   ├── benchmark_test.py   # Benchmark testing script
 │   ├── test.csv            # Test data input
 │   └── test_with_results.csv # Test results output
-└── utils/
-    ├── config_utils.py     # Configuration utilities
-    ├── csv_utils.py        # CSV handling utilities
-    ├── litex_utils.py      # Litex processing utilities
-    └── tmp_hasher.py       # Temporary file hashing
+├── utils/
+│   ├── __init__.py
+│   ├── ai_utils.py         # AI model interaction utilities
+│   ├── config_utils.py     # Configuration utilities
+│   ├── csv_utils.py        # CSV handling utilities
+│   ├── litex_utils.py      # LiteX processing utilities
+│   └── tmp_hasher.py       # Temporary file hashing
+└── tmp/                    # Temporary processing files
 ```
 
 ## Installation
@@ -51,16 +56,10 @@ litex-task-verifier/
    pip install -r requirements.txt
    ```
 
-   Or install manually:
-
-   ```bash
-   pip install 'volcengine-python-sdk[ark]'
-   ```
-
    The required dependencies are:
 
-   - `volcengine-python-sdk[ark]` (for AI model access)
-   - `pylitex` (for Litex grammar verification)
+   - `openai` (for AI model access)
+   - `pylitex` (for LiteX grammar verification)
 
 3. **Configure API access**:
    ```bash
@@ -102,14 +101,14 @@ print("Semantic verification:", semantic_result)
 # Returns: {'title': '...', 'description': '...', 'solution': '...', 
 #          'collaboration_title': '...', 'expect': '...', 'actual': 'Yes'}
 
-# Grammar verification (checks Litex syntax correctness)
+# Grammar verification (checks LiteX syntax correctness)
 grammar_result = verify_grammar(test_data)
 print("Grammar verification:", grammar_result)
 # Returns: {'title': '...', 'description': '...', 'solution': '...', 
 #          'collaboration_title': '...', 'output': '...', 'success': True}
 ```
 
-**Note**: If Litex to LaTeX conversion fails during semantic verification, the function returns `"No"` for the `actual` field to handle invalid syntax gracefully.
+**Note**: If LiteX to LaTeX conversion fails during semantic verification, the function returns `"No"` for the `actual` field to handle invalid syntax gracefully.
 
 ### Batch Processing
 
@@ -129,11 +128,11 @@ from verifier import verify_semantic, verify_grammar
 test_data = load_csv_dicts("test/test.csv")
 
 # Semantic verification with multiprocessing
-with mp.Pool(processes=500) as pool:
+with mp.Pool(processes=40) as pool:
     semantic_results = pool.map(verify_semantic, test_data)
 
 # Grammar verification with multiprocessing  
-with mp.Pool(processes=500) as pool:
+with mp.Pool(processes=40) as pool:
     grammar_results = pool.map(verify_grammar, test_data)
 
 # Export results
@@ -152,8 +151,8 @@ This will:
 
 - Process all test cases in `test/test.csv`
 - Generate results in `test/test_with_results.csv`
-- Display detailed performance metrics for each model
-- Show overall system accuracy and individual model comparisons
+- Display detailed performance metrics and missed cases
+- Show overall system accuracy
 
 ### CSV Input Format
 
@@ -161,7 +160,7 @@ Your input CSV should contain these columns:
 
 - `title`: Problem title
 - `description`: Problem description
-- `solution`: Litex code solution
+- `solution`: LiteX code solution
 - `collaboration_title`: Additional context
 - `expect`: Expected verification result ("TRUE" or "FALSE")
 
@@ -175,8 +174,8 @@ Returns a dictionary with:
 #### Grammar Verification (`verify_grammar`)
 Returns a dictionary with:
 - All original input fields
-- `output`: Litex compilation output/error messages
-- `success`: Boolean indicating if Litex code compiled successfully
+- `output`: LiteX compilation output/error messages
+- `success`: Boolean indicating if LiteX code compiled successfully
 
 ## API Models Used
 
@@ -202,10 +201,10 @@ The tool uses an enhanced dual-round voting system where:
 ```python
 from verifier import verify_semantic, verify_grammar
 
-# Semantic verification - checks if Litex code solves the given problem
+# Semantic verification - checks if LiteX code solves the given problem
 result = verify_semantic(test_data)
 
-# Grammar verification - checks if Litex code is syntactically correct
+# Grammar verification - checks if LiteX code is syntactically correct
 result = verify_grammar(test_data)
 ```
 
@@ -238,21 +237,15 @@ export_csv_dicts("output.csv", results, write_mode="w")
 
 ## Benchmark Results
 
-The tool has been extensively tested on a dataset of 449 test cases (360 positive cases expecting "Yes" and 89 negative cases expecting "No"). Here are the performance metrics:
+The tool has been extensively tested on a dataset of 449 test cases (360 positive cases expecting "TRUE" and 89 negative cases expecting "FALSE"). Here are the performance metrics:
 
 ### Overall System Performance
 
 - **True Positive Rate**: 356/360 = 98.89% (correctly identified valid solutions)
-- **True Negative Rate**: 89/89 = 100% (correctly identified invalid solutions)
+- **True Negative Rate**: 89/89 = 100% (correctly identified invalid solutions)  
 - **False Negative Rate**: 4/360 = 1.11% (missed valid solutions)
 - **False Positive Rate**: 0/89 = 0% (no false positives)
 - **Overall Accuracy**: 445/449 = 99.11%
-
-### Individual Model Performance
-
-| Model               | True Positive | True Negative | False Negative | False Positive | Accuracy   |
-| ------------------- | ------------- | ------------- | -------------- | -------------- | ---------- |
-| **Combined System** | 98.89%        | 100%          | 1.11%          | 0%             | **99.11%** |
 
 ### Key Insights
 
@@ -261,7 +254,17 @@ The tool has been extensively tested on a dataset of 449 test cases (360 positiv
 - **Enhanced robustness**: Dual-round voting reduces model response variability impact
 - **Combined system achieves 99.11% accuracy**, demonstrating excellent performance
 - The system maintains its conservative approach, preferring to miss some valid solutions rather than approve invalid ones
-- **Improved false negative rate**: Reduced from 1.94% to 1.11% with dual-round voting
+- **Improved false negative rate**: Reduced to 1.11% with dual-round voting
+
+### Missed Cases Analysis
+
+The system missed 4 true positive cases:
+- inequality antisymmetry
+- multiplication sign rules negative × negative = positive
+- mixed number conversion
+- Non-Negative Subtraction
+
+These cases represent edge cases in mathematical reasoning that require further prompt engineering.
 
 ## Performance
 
@@ -270,15 +273,15 @@ The tool supports multiprocessing for batch operations:
 ```python
 import multiprocessing as mp
 
-with mp.Pool(processes=MAX_PROCESSORS) as pool:
-    results = pool.map(verifier, test_cases)
+with mp.Pool(processes=40) as pool:
+    results = pool.map(verify_semantic, test_cases)
 ```
 
 ## Error Handling
 
 The verifier includes comprehensive error handling for:
 
-- Litex to LaTeX conversion failures
+- LiteX to LaTeX conversion failures
 - API communication errors
 - Configuration file issues
 - Invalid input data
@@ -306,11 +309,8 @@ For issues and questions, please open an issue on GitHub or contact the developm
 - **Enhanced Dual-Round Voting**: Implemented 2-round voting system for improved reliability (6 total votes)
 - **Improved Accuracy**: Achieved 99.11% overall accuracy with enhanced voting mechanism
 - **Model Update**: Transitioned to Qwen Max, Qwen Plus, and DeepSeek V3.1 for optimal performance
-- **Error Handling**: Enhanced error handling for Litex conversion failures
-- **Reduced False Negatives**: Decreased false negative rate from 1.94% to 1.11%
+- **Error Handling**: Enhanced error handling for LiteX conversion failures
+- **Reduced False Negatives**: Decreased false negative rate to 1.11%
 - **Configuration Simplification**: Streamlined config.json structure with unified API key field
-- Refactored configuration management to use JSON files
-- Added comprehensive error handling
-- Improved code organization with utilities
-- Enhanced multiprocessing support
-- Added template configuration files
+- **Multiprocessing Optimization**: Fixed multiprocessing issues for stable parallel processing
+- **Comprehensive Testing**: Added detailed benchmark analysis with missed case reporting
