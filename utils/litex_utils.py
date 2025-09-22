@@ -11,25 +11,24 @@ import subprocess
 LITEX_PATH = "litex"  # Adjust if litex is not in PATH
 
 
-def extract_document_content(tex: str) -> str:
+def extract_document_content(tex: str) -> str | None:
     """
-    Return the content between \\begin{document} and \\end{document}.
+    Return the content between \\begin{claim} and \\begin{proof}.
 
     This uses a non-greedy DOTALL regex and strips leading/trailing whitespace.
     Raises ValueError if no document environment is found.
 
-    :param tex: The full LaTeX document as a string.
-    :return: The content inside the document environment.
-    :raises ValueError: If no document environment is found.
+    :param tex: The full LaTeX claim as a string.
+    :return: The content inside the document environment, or None if not found.
     """
-    pattern = re.compile(r"\\begin\{document\}(.*?)\\end\{document\}", re.DOTALL)
+    pattern = re.compile(r"\\begin\{claim\}(.*?)\\begin\{proof\}", re.DOTALL)
     m = pattern.search(tex)
     if not m:
-        raise ValueError("No document environment found")
+        return None
     return m.group(1).strip()
 
 
-def litex_latex_converter(litex_code: str) -> dict:
+def convert_litex_latex(litex_code: str) -> dict:
     """
     Convert a Litex file to LaTeX format using the Litex REPL.
 
@@ -45,7 +44,14 @@ def litex_latex_converter(litex_code: str) -> dict:
             text=True,
             check=True,
         )
-        return {"success": True, "message": extract_document_content(result.stdout)}
+        claim_content = extract_document_content(result.stdout)
+        if claim_content is not None:
+            return {"success": True, "message": (result.stdout)}
+        else:
+            return {
+                "success": False,
+                "message": "No claim environment found in the LaTeX output.",
+            }
     except subprocess.CalledProcessError as e:
         return {"success": False, "message": e.stderr}
     except FileNotFoundError:

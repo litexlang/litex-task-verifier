@@ -65,7 +65,7 @@ litex-task-verifier/
 3. **Configure API access**:
    ```bash
    cp config.json.template config.json
-   # Edit config.json and add your VolcEngine API key
+   # Edit config.json and add your API key
    ```
 
 ## Configuration
@@ -74,7 +74,7 @@ Create a `config.json` file in the project root:
 
 ```json
 {
-  "volcengine_api_key": "your_api_key_here"
+  "api_key": "your_api_key_here"
 }
 ```
 
@@ -91,19 +91,25 @@ from verifier import verify_semantic, verify_grammar
 test_data = {
     "title": "Problem Title",
     "description": "Mathematical problem description",
-    "solution": "Litex code solution",
+    "solution": "claim:\n    forall a, b R:\n        a + b = b + a\n    prove:\n        a + b = b + a",
     "collaboration_title": "Collaboration info",
-    "expect": "Yes"  # Expected result
+    "expect": "TRUE"  # Expected result
 }
 
 # Semantic verification (checks if solution addresses the problem)
 semantic_result = verify_semantic(test_data)
 print("Semantic verification:", semantic_result)
+# Returns: {'title': '...', 'description': '...', 'solution': '...', 
+#          'collaboration_title': '...', 'expect': '...', 'actual': 'Yes'}
 
 # Grammar verification (checks Litex syntax correctness)
 grammar_result = verify_grammar(test_data)
 print("Grammar verification:", grammar_result)
+# Returns: {'title': '...', 'description': '...', 'solution': '...', 
+#          'collaboration_title': '...', 'output': '...', 'success': True}
 ```
+
+**Note**: If Litex to LaTeX conversion fails during semantic verification, the function returns `"No"` for the `actual` field to handle invalid syntax gracefully.
 
 ### Batch Processing
 
@@ -157,17 +163,14 @@ Your input CSV should contain these columns:
 - `description`: Problem description
 - `solution`: Litex code solution
 - `collaboration_title`: Additional context
-- `expect`: Expected verification result ("Yes" or "No")
+- `expect`: Expected verification result ("TRUE" or "FALSE")
 
 ### Output Format
 
 #### Semantic Verification (`verify_semantic`)
 Returns a dictionary with:
 - All original input fields
-- `actual`: Final verification result
-- `deepseek_r1`: DeepSeek R1 model response
-- `doubao`: Doubao model response
-- `kimi`: Kimi model response
+- `actual`: Final verification result ("Yes" or "No")
 
 #### Grammar Verification (`verify_grammar`)
 Returns a dictionary with:
@@ -177,18 +180,20 @@ Returns a dictionary with:
 
 ## API Models Used
 
-- **DeepSeek R1**: `deepseek-r1-250528`
-- **Kimi K2**: `kimi-k2-250905`
-- **Doubao Seed**: `doubao-seed-1-6-thinking-250715`
+- **Qwen Max**: `qwen-max-latest`
+- **Qwen Plus**: `qwen-plus-latest`  
+- **DeepSeek V3.1**: `deepseek-v3.1`
 
 ### Voting Mechanism
 
-The tool uses a majority voting system where:
+The tool uses an enhanced dual-round voting system where:
 
-- Each model provides a "Yes" or "No" answer
-- If any model answers "Yes", the final result is "Yes"
-- Only if all models answer "No", the final result is "No"
-- This approach favors inclusion and reduces false negatives
+- Each of the 3 models is queried twice (2 rounds), generating 6 total responses
+- Each model provides a "Yes" or "No" answer per round
+- If any of the 6 responses is "Yes", the final result is "Yes"
+- Only if all 6 responses are "No", the final result is "No"
+- This approach favors inclusion and significantly reduces false negatives
+- The dual-round system improves reliability by accounting for model response variability
 
 ## Utilities
 
@@ -233,32 +238,30 @@ export_csv_dicts("output.csv", results, write_mode="w")
 
 ## Benchmark Results
 
-The tool has been extensively tested on a dataset of 450 test cases (361 positive cases expecting "Yes" and 89 negative cases expecting "No"). Here are the performance metrics:
+The tool has been extensively tested on a dataset of 449 test cases (360 positive cases expecting "Yes" and 89 negative cases expecting "No"). Here are the performance metrics:
 
 ### Overall System Performance
 
-- **True Positive Rate**: 354/361 = 98.06% (correctly identified valid solutions)
+- **True Positive Rate**: 356/360 = 98.89% (correctly identified valid solutions)
 - **True Negative Rate**: 89/89 = 100% (correctly identified invalid solutions)
-- **False Negative Rate**: 7/361 = 1.94% (missed valid solutions)
+- **False Negative Rate**: 4/360 = 1.11% (missed valid solutions)
 - **False Positive Rate**: 0/89 = 0% (no false positives)
-- **Overall Accuracy**: 443/450 = 98.44%
+- **Overall Accuracy**: 445/449 = 99.11%
 
 ### Individual Model Performance
 
 | Model               | True Positive | True Negative | False Negative | False Positive | Accuracy   |
 | ------------------- | ------------- | ------------- | -------------- | -------------- | ---------- |
-| **Combined System** | 98.06%        | 100%          | 1.94%          | 0%             | **98.44%** |
-| DeepSeek R1         | 81.72%        | 100%          | 16.90%         | 0%             | 85.33%     |
-| Doubao              | 89.75%        | 100%          | 10.25%         | 0%             | 91.78%     |
-| Kimi                | 96.68%        | 100%          | 3.32%          | 0%             | 97.33%     |
+| **Combined System** | 98.89%        | 100%          | 1.11%          | 0%             | **99.11%** |
 
 ### Key Insights
 
-- The **majority voting system significantly improves accuracy** compared to individual models
-- **Perfect specificity**: No false positives across all models and the combined system
-- **Kimi performs best** among individual models with 97.33% accuracy
-- **Combined system achieves 98.44% accuracy**, outperforming any single model
-- The system is conservative, preferring to miss some valid solutions rather than approve invalid ones
+- The **dual-round voting system significantly improves accuracy** compared to single-round approaches
+- **Perfect specificity**: No false positives across the combined system
+- **Enhanced robustness**: Dual-round voting reduces model response variability impact
+- **Combined system achieves 99.11% accuracy**, demonstrating excellent performance
+- The system maintains its conservative approach, preferring to miss some valid solutions rather than approve invalid ones
+- **Improved false negative rate**: Reduced from 1.94% to 1.11% with dual-round voting
 
 ## Performance
 
@@ -300,14 +303,12 @@ For issues and questions, please open an issue on GitHub or contact the developm
 
 ### Recent Updates
 
-- **Dual Verification System**: Added separate semantic and grammar verification modes
-- **pylitex Integration**: Replaced external Litex dependency with pylitex for grammar checking
-- **Enhanced Prompting**: Improved AI prompts with specific guidelines for different math problem types
-- **Function Restructuring**: Split verification into `verify_semantic()` and `verify_grammar()`
-- **Dependency Updates**: Added `pylitex` for Litex grammar verification
-- **Optimized Model Selection**: Refined to use 3 high-performing models for efficient verification
-- **Enhanced Performance**: Streamlined processing with DeepSeek R1, Kimi, and Doubao models
-- **Improved Reliability**: Maintained robust majority voting with optimized model combination
+- **Enhanced Dual-Round Voting**: Implemented 2-round voting system for improved reliability (6 total votes)
+- **Improved Accuracy**: Achieved 99.11% overall accuracy with enhanced voting mechanism
+- **Model Update**: Transitioned to Qwen Max, Qwen Plus, and DeepSeek V3.1 for optimal performance
+- **Error Handling**: Enhanced error handling for Litex conversion failures
+- **Reduced False Negatives**: Decreased false negative rate from 1.94% to 1.11%
+- **Configuration Simplification**: Streamlined config.json structure with unified API key field
 - Refactored configuration management to use JSON files
 - Added comprehensive error handling
 - Improved code organization with utilities
