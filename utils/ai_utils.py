@@ -1,3 +1,9 @@
+"""ai_utils.py
+
+Utility functions for interacting with AI models to verify LaTeX code.
+"""
+
+
 from openai import OpenAI
 from utils.config_utils import get_api_key
 from utils.litex_utils import convert_litex_latex

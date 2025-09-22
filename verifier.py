@@ -1,6 +1,6 @@
 """verifier.py
 
-Verification utility using multiple LLMs to check if LaTeX code solves a given topic.
+Functions to verify LaTeX code against given topics and check for grammatical correctness.
 """
 
 from utils.ai_utils import ask_agent, generate_prompt, get_agent_list
