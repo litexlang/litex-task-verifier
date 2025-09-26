@@ -11,7 +11,7 @@ VOTING_ROUND = 2
 
 def verify_semantic(row: dict[str, str]):
     """
-    Verify if the LaTeX code solves the given topic using multiple LLMs.
+    Verify if the Litex code solves the given topic using multiple LLMs.
 
     :param row: A dictionary containing 'description', 'solution', and 'expect' keys.
     :return: A dictionary with the original data and the verification results.
@@ -57,7 +57,7 @@ def verify_semantic(row: dict[str, str]):
 
 def verify_grammar(row: dict[str, str]):
     """
-    Verify if the LaTeX code is grammatically correct.
+    Verify if the Litex code is grammatically correct.
 
     :param row: A dictionary containing 'description' and 'solution' keys.
     :return: A dictionary with the original data and the grammar verification results.

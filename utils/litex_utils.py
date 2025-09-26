@@ -15,9 +15,6 @@ def extract_document_content(tex: str) -> str | None:
     """
     Return the content between \\begin{claim} and \\begin{proof}.
 
-    This uses a non-greedy DOTALL regex and strips leading/trailing whitespace.
-    Raises ValueError if no document environment is found.
-
     :param tex: The full LaTeX claim as a string.
     :return: The content inside the document environment, or None if not found.
     """
@@ -30,7 +27,7 @@ def extract_document_content(tex: str) -> str | None:
 
 def convert_litex_latex(litex_code: str) -> dict:
     """
-    Convert a Litex file to LaTeX format using the Litex REPL.
+    Convert a Litex file to LaTeX format using the Litex Core.
 
     :param litex_file_path: Path to the Litex file.
     :return: The LaTeX formatted string.
