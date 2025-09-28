@@ -62,7 +62,7 @@ def verify_grammar(row: dict[str, str]):
     :param row: A dictionary containing 'description' and 'solution' keys.
     :return: A dictionary with the original data and the grammar verification results.
     """
-    result = pylitex.run(row["solution"])
+    result = pylitex.run(row["solution"].replace("\r\n", "\n"))
     return {
         "title": row["title"],
         "description": row["description"],

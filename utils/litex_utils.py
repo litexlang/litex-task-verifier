@@ -34,7 +34,7 @@ def convert_litex_latex(litex_code: str) -> dict:
     """
 
     try:
-        result = pylitex.convert_to_latex(litex_code)
+        result = pylitex.convert_to_latex(litex_code.replace("\r\n", "\n"))
         claim_content = extract_document_content(result["message"])
         if claim_content is not None:
             return {"success": True, "message": (result["message"])}
