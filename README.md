@@ -25,20 +25,17 @@ litex-task-verifier/
 ├── requirements.txt         # Python dependencies
 ├── verifier.py              # Main verification logic
 ├── config.json.template     # Template for configuration
-├── __init__.py              # Package initialization
 ├── test/
-│   ├── __init__.py
 │   ├── benchmark_test.py   # Benchmark testing script
 │   ├── test.csv            # Test data input
 │   └── test_with_results.csv # Test results output
 ├── utils/
-│   ├── __init__.py
 │   ├── ai_utils.py         # AI model interaction utilities
 │   ├── config_utils.py     # Configuration utilities
 │   ├── csv_utils.py        # CSV handling utilities
 │   ├── litex_utils.py      # Litex processing utilities
 │   └── tmp_hasher.py       # Temporary file hashing
-└── tmp/                    # Temporary processing files
+└── config.json              # Configuration file (created after setup)
 ```
 
 ## Installation
@@ -59,7 +56,7 @@ litex-task-verifier/
    The required dependencies are:
 
    - `openai` (for AI model access)
-   - `pylitex` (for Litex grammar verification)
+   - `pylitex >= 0.2.0` (for Litex grammar verification and LaTeX conversion)
 
 3. **Configure API access**:
    ```bash
@@ -235,6 +232,20 @@ data = load_csv_dicts("input.csv")
 export_csv_dicts("output.csv", results, write_mode="w")
 ```
 
+### Litex Utils (`utils/litex_utils.py`)
+
+```python
+from utils.litex_utils import convert_litex_latex, extract_document_content
+
+# Convert Litex code to LaTeX using pylitex
+result = convert_litex_latex(litex_code)
+# Returns: {"success": True, "message": "latex_output"} or {"success": False, "message": "error"}
+
+# Extract claim content from LaTeX
+claim_content = extract_document_content(latex_tex)
+# Returns the content between \begin{claim} and \begin{proof}
+```
+
 ## Benchmark Results
 
 The tool has been extensively tested on a dataset of 449 test cases (360 positive cases expecting "TRUE" and 89 negative cases expecting "FALSE"). Here are the performance metrics:
@@ -281,10 +292,13 @@ with mp.Pool(processes=40) as pool:
 
 The verifier includes comprehensive error handling for:
 
-- Litex to LaTeX conversion failures
+- Litex to LaTeX conversion failures using `pylitex.convert_to_latex()`
+- Missing or invalid claim environments in LaTeX output
 - API communication errors
 - Configuration file issues
 - Invalid input data
+- Subprocess errors and file system issues
+- Improved exception handling with graceful error recovery
 
 ## Contributing
 
@@ -309,8 +323,10 @@ For issues and questions, please open an issue on GitHub or contact the developm
 - **Enhanced Dual-Round Voting**: Implemented 2-round voting system for improved reliability (6 total votes)
 - **Improved Accuracy**: Achieved 99.11% overall accuracy with enhanced voting mechanism
 - **Model Update**: Transitioned to Qwen Max, Qwen Plus, and DeepSeek V3.1 for optimal performance
-- **Error Handling**: Enhanced error handling for Litex conversion failures
+- **Pylitex Integration**: Updated to use `pylitex >= 0.2.0` for improved Litex to LaTeX conversion
+- **Enhanced Error Handling**: Improved conversion failure handling with claim environment validation
 - **Reduced False Negatives**: Decreased false negative rate to 1.11%
 - **Configuration Simplification**: Streamlined config.json structure with unified API key field
 - **Multiprocessing Optimization**: Fixed multiprocessing issues for stable parallel processing
 - **Comprehensive Testing**: Added detailed benchmark analysis with missed case reporting
+- **Litex Utils Enhancement**: Added `extract_document_content()` for better LaTeX processing

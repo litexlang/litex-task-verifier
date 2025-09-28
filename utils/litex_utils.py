@@ -3,9 +3,9 @@
 Utilities for interacting with Litex, including converting Litex code to LaTeX format.
 """
 
-from utils.tmp_hasher import store_string
 import re
 import subprocess
+import pylitex
 
 
 LITEX_PATH = "litex"  # Adjust if litex is not in PATH
@@ -29,21 +29,15 @@ def convert_litex_latex(litex_code: str) -> dict:
     """
     Convert a Litex file to LaTeX format using the Litex Core.
 
-    :param litex_file_path: Path to the Litex file.
+    :param litex_code: The Litex code as a string.
     :return: The LaTeX formatted string.
     """
-    file_path = store_string(litex_code, prefix="litex_", suffix=".lix")
 
     try:
-        result = subprocess.run(
-            [LITEX_PATH, "-latex", file_path],
-            capture_output=True,
-            text=True,
-            check=True,
-        )
-        claim_content = extract_document_content(result.stdout)
+        result = pylitex.convert_to_latex(litex_code)
+        claim_content = extract_document_content(result["message"])
         if claim_content is not None:
-            return {"success": True, "message": (result.stdout)}
+            return {"success": True, "message": (result["message"])}
         else:
             return {
                 "success": False,
