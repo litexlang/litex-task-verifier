@@ -1,3 +1,3 @@
 # Litex Task Verifier Dependencies
 openai
-pylitex >= 0.2.0
+pylitex >= 0.2.1
