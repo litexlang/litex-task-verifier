@@ -13,7 +13,7 @@ def verify_semantic(row: dict[str, str]):
     """
     Verify if the Litex code solves the given topic using multiple LLMs.
 
-    :param row: A dictionary containing 'description', 'solution', and 'expect' keys.
+    :param row: A dictionary containing 'title', 'description', 'solution', and 'expect' keys.
     :return: A dictionary with the original data and the verification results.
     """
     prompt = generate_prompt(row)
@@ -37,14 +37,6 @@ def verify_semantic(row: dict[str, str]):
         answers = [result.choices[0].message.content for result in results]  # type: ignore
         answer = "Yes" if "Yes" in answers else "No"
 
-        print(
-            "Except:",
-            row["expect"],
-            "\tAnswers:",
-            answers,
-            "\tAnswer:",
-            answer,
-        )
         return {
             "title": row["title"],
             "description": row["description"],
@@ -59,15 +51,13 @@ def verify_grammar(row: dict[str, str]):
     """
     Verify if the Litex code is grammatically correct.
 
-    :param row: A dictionary containing 'description' and 'solution' keys.
+    :param row: A dictionary containing 'code' and 'expect' keys.
     :return: A dictionary with the original data and the grammar verification results.
     """
-    result = pylitex.run(row["solution"].replace("\r\n", "\n"))
+    result = pylitex.run(row["code"].replace("\r\n", "\n"))
     return {
-        "title": row["title"],
-        "description": row["description"],
-        "solution": row["solution"],
-        "collaboration_title": row["collaboration_title"],
+        "code": row["code"],
         "output": result["message"],
-        "success": result["success"],
+        "expect": row["expect"],
+        "actual": result["success"],
     }

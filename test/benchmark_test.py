@@ -1,6 +1,8 @@
 """Benchmark Test Script
 
-This script benchmarks the performance of the LaTeX code verifier. It loads test cases from a CSV file, processes them using multiple processors, and exports the results to a new CSV file. It also provides a summary of the verification accuracy for each LLM used.
+This script runs benchmark tests for both semantic and grammar verification
+of Litex code using multiple processors. It loads test cases from CSV files,
+processes them, and provides a summary of the verification accuracy.
 """
 
 import multiprocessing as mp
@@ -11,22 +13,22 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
-from utils.csv_utils import export_csv_dicts, load_csv_dicts
-from verifier import verify_semantic
+from utils.csv_utils import load_csv_dicts
+from verifier import verify_grammar, verify_semantic
 
 
 MAX_PROCESSORS = 40
-CSV_PATH = Path.cwd() / "test" / "test.csv"
-EXPORT_CSV_PATH = Path.cwd() / "test" / "test_with_results.csv"
+SEMANTIC_CSV_PATH = Path.cwd() / "test" / "semantic_test.csv"
+GRAMMAR_CSV_PATH = Path.cwd() / "test" / "grammar_test.csv"
 
 
 if __name__ == "__main__":
-    test_info = load_csv_dicts(CSV_PATH)
+    semantic_test_list = load_csv_dicts(SEMANTIC_CSV_PATH)
+    grammar_test_list = load_csv_dicts(GRAMMAR_CSV_PATH)
 
     with mp.Pool(processes=MAX_PROCESSORS) as pool:
-        results = pool.map(verify_semantic, test_info)
+        semantic_result = pool.map(verify_semantic, semantic_test_list)
 
-    export_csv_dicts(EXPORT_CSV_PATH, results, write_mode="w")
 
     t = 0
     f = 0
@@ -38,7 +40,7 @@ if __name__ == "__main__":
 
     print("Detailed Missed Cases:")
 
-    for r in results:
+    for r in semantic_result:
         if r["expect"] == "TRUE":
             t += 1
             if r["actual"] == "Yes":
@@ -56,7 +58,44 @@ if __name__ == "__main__":
 
     print("\n")
     print("=================================================")
-    print("Summary:")
+    print("Semantic Summary:")
+    print("======================Total======================")
+    print(f"True Positive: {tt} / {t} = {tt/t if t>0 else 0}")
+    print(f"True Negative: {ff} / {f} = {ff/f if f>0 else 0}")
+    print(f"False Negative: {tf} / {t} = {tf/t if t>0 else 0}")
+    print(f"False Positive: {ft} / {f} = {ft/f if f>0 else 0}")
+
+    with mp.Pool(processes=MAX_PROCESSORS) as pool:
+        grammar_results = pool.map(verify_grammar, grammar_test_list)
+
+    t = 0
+    f = 0
+
+    tt = 0
+    tf = 0
+    ft = 0
+    ff = 0
+
+    print("\nDetailed Missed Cases:")
+
+    for r in grammar_results:
+        if r["expect"] == "True":
+            t += 1
+            if r["actual"]:
+                tt += 1
+            if not r["actual"]:
+                tf += 1
+                print(f"Missed True for code:\n{r['code']}\n")
+        elif r["expect"] == "False":
+            f += 1
+            if not r["actual"]:
+                ff += 1
+            if r["actual"]:
+                ft += 1
+                print(f"Missed False for code:\n{r['code']}\n")
+    
+    print("=================================================")
+    print("Grammar Summary:")
     print("======================Total======================")
     print(f"True Positive: {tt} / {t} = {tt/t if t>0 else 0}")
     print(f"True Negative: {ff} / {f} = {ff/f if f>0 else 0}")
@@ -64,7 +103,7 @@ if __name__ == "__main__":
     print(f"False Positive: {ft} / {f} = {ft/f if f>0 else 0}")
 
 # =================================================
-# Summary (One round voting):
+# Semantic Summary (One round voting):
 # ======================Total======================
 # True Positive: 356 / 361 = 0.9861495844875346
 # True Negative: 89 / 89 = 1.0
@@ -72,9 +111,17 @@ if __name__ == "__main__":
 # False Positive: 0 / 89 = 0.0
 
 # =================================================
-# Summary (Two rounds voting):
+# Semantic Summary (Two rounds voting):
 # ======================Total======================
 # True Positive: 356 / 360 = 0.9888888888888889
 # True Negative: 89 / 89 = 1.0
 # False Negative: 4 / 360 = 0.011111111111111112
 # False Positive: 0 / 89 = 0.0
+
+# =================================================
+# Grammar Summary:
+# ======================Total======================
+# True Positive: 2775 / 2775 = 1.0
+# True Negative: 109 / 109 = 1.0
+# False Negative: 0 / 2775 = 0.0
+# False Positive: 0 / 109 = 0.0
