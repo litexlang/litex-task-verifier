@@ -105,17 +105,17 @@ if __name__ == "__main__":
 # =================================================
 # Semantic Summary (One round voting):
 # ======================Total======================
-# True Positive: 356 / 361 = 0.9861495844875346
+# True Positive: 322 / 360 = 0.8944444444444445
 # True Negative: 89 / 89 = 1.0
-# False Negative: 5 / 361 = 0.013850415512465374
+# False Negative: 38 / 360 = 0.10555555555555556
 # False Positive: 0 / 89 = 0.0
 
 # =================================================
 # Semantic Summary (Two rounds voting):
 # ======================Total======================
-# True Positive: 356 / 360 = 0.9888888888888889
+# True Positive: 324 / 360 = 0.9
 # True Negative: 89 / 89 = 1.0
-# False Negative: 4 / 360 = 0.011111111111111112
+# False Negative: 36 / 360 = 0.1
 # False Positive: 0 / 89 = 0.0
 
 # =================================================

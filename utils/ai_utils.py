@@ -11,7 +11,7 @@ from utils.litex_utils import convert_litex_latex
 API_KEY = get_api_key()
 
 
-def generate_prompt(row: dict[str, str]) -> str | None:
+def generate_prompt(row: dict[str, str]) -> list[dict[str, str]] | None:
     """
     Generate a prompt to verify if the LaTeX code solves the given topic.
 
@@ -28,24 +28,19 @@ def generate_prompt(row: dict[str, str]) -> str | None:
     except Exception as e:
         return None
     latex_code = latex_code_converter_result["message"]
-    return f"""
-You are a knowledgeable assistant skilled in evaluating LaTeX code for mathematical and logical correctness.
-For those basic math conceptions, if the LaTeX code is translating the conceptions only, please consider it as solving the topic.
-For those obvious math problems, if the LaTeX code is directly providing the final answer or solution to the problem, even it was problem itself, please consider it as solving the topic.
-For those easy math algebra problems, if the LaTeX code is solving for a variable or simplifying an expression, please consider it as solving the topic.
-For those polynomial transformation or simplification problems, if the LaTeX code is transforming the polynomial to another form, please consider it as solving the topic.
+    prompt = [{"role": "system", "content": "You are a knowledgeable assistant skilled in evaluating LaTeX code for mathematical and logical correctness. You should follow the user's instructions carefully and provide accurate assessments based on the provided LaTeX code and topic. you should answer \"Yes\" or \"No\" only."}]
+    prompt.append({"role": "user", "content": "Consider this restrict: You should answer \"Yes\" if the LaTeX code is clearly and unambiguously attempting to describe or solve the given topic."})
+    prompt.append({"role": "user", "content": "Consider this restrict: You should answer \"Yes\" if the LaTeX code is using different symbol to describe the vars in the topic, like \"x\", \"y\", \"z\" or other math symbol but still represent the same calculation relationship between numbers and vars."})
+    prompt.append({"role": "user", "content": "Consider this restrict: You should answer \"Yes\" if the LaTeX code is translating the conceptions only for those basic math conceptions."})
+    prompt.append({"role": "user", "content": "Consider this restrict: You should answer \"Yes\" if the LaTeX code is directly providing the final answer or solution to the problem, even it was problem itself for those obvious math problems. "})
+    prompt.append({"role": "user", "content": "Consider this restrict: You should answer \"Yes\" if the LaTeX code is solving for a variable or simplifying an expression for those easy math algebra problems. "})
+    prompt.append({"role": "user", "content": "Consider this restrict: You should answer \"Yes\" if the LaTeX code is transforming the polynomial to another form for those polynomial transformation or simplification problems."})
+    prompt.append({"role": "user", "content": "Consider this restrict: You must answer \"No\" if the same answer shown both before and after the $\\Rightarrow$ symbol."})
 
-Topic: 
-{topic}
+    prompt.append({"role": "user", "content": f"Here is the topic and the LaTeX code:\nTopic:\n{topic}\n\nLaTeX code:\n```\n{latex_code}\n```"})
+    prompt.append({"role": "user", "content": "Is the LaTeX code describe the topic? Answer \"Yes\" or \"No\" only."})
 
-LaTeX code:
-```
-{latex_code}
-```
-
-Is the LaTeX code trying to prove or solve the given topic above?
-You can answer "Yes" or "No" only. "Yes" means the LaTeX code is indeed trying to prove or solve the topic, while "No" indicates it does not.
-    """.strip()
+    return prompt
 
 
 def get_agent_list() -> list[str]:
@@ -55,10 +50,10 @@ def get_agent_list() -> list[str]:
     :param model: Model name string.
     :return: Corresponding agent identifier.
     """
-    return ["qwen-max-latest", "qwen-plus-latest", "deepseek-v3.1"]
+    return ["qwen-max-latest", "qwen-plus-latest", "Pro/deepseek-ai/DeepSeek-V3.1"]
 
 
-def ask_agent(info: tuple[str, str]):
+def ask_agent(info: tuple[str, list[dict[str, str]]]):
     """
     Ask a specific agent (model) to process the prompt.
 
@@ -71,17 +66,11 @@ def ask_agent(info: tuple[str, str]):
 
     client = OpenAI(
         api_key=API_KEY,
-        base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        base_url="http://35.220.164.252:3888/v1/",
     )
 
     completion = client.chat.completions.create(
         model=model,
-        messages=[
-            {
-                "role": "system",
-                "content": "You are a knowledgeable assistant skilled in evaluating LaTeX code for mathematical and logical correctness.",
-            },
-            {"role": "user", "content": prompt},
-        ],
+        messages=prompt, # type: ignore
     )
     return completion
